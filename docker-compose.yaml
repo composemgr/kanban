@@ -1,0 +1,38 @@
+name: kanban
+services:
+  server:
+    image: kanboard/kanboard:latest
+    container_name: kanban-server
+    hostname: kanban-server
+    restart: always
+    pull_policy: always
+    environment:
+      DATABASE_URL: mysql://kanboard:kanboard@db/kanboard
+    ports:
+      - '1270.0.1:59009:80'
+    volumes:
+      - /var/lib/srv/$USER/docker/kanboard/kanboard/latest/rootfs/data/kanban:/var/www/app/data
+      - /var/lib/srv/$USER/docker/kanboard/kanboard/latest/rootfs/data/kanban/plugins:/var/www/app/plugins
+    networks:
+      - kanban
+  db:
+    image: mariadb:latest
+    container_name: kanban-db
+    hostname: kanban-db
+    restart: always
+    pull_policy: always
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_USER: kanboard
+      MYSQL_PASSWORD: kanboard
+      MYSQL_DATABASE: kanboard
+      MYSQL_ROOT_PASSWORD: secret
+    volumes:
+      - /var/lib/srv/$USER/docker/kanboard/kanboard/latest/rootfs/data/db/mariadb:/var/lib/mysql
+    networks:
+      - kanban
+
+networks:
+  kanban:
+    name: kanban
+    external: false
