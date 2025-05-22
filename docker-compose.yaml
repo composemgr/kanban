@@ -1,0 +1,67 @@
+# nginx proxy address - http://172.17.0.1:59009
+
+name: kanban
+x-logging: &default-logging
+  options:
+    max-size: '5m'
+    max-file: '1'
+  driver: json-file
+
+services:
+  server:
+    image: kanboard/kanboard:latest
+    container_name: kanban-server
+    hostname: ${BASE_HOST_NAME:-$HOSTNAME}
+    restart: always
+    pull_policy: always
+    logging: *default-logging
+    environment:
+      - TZ=${TZ:-America/New_York}
+      - DATABASE_URL=mysql://kanboard:nY05cTKHNAUTRzA7uCjMYBP64MeXOwgq@db/kanboard
+    ports:
+      - '1270.0.1:59009:80'
+    volumes:
+      - /var/lib/srv/$USER/docker/kanboard/kanboard/latest/rootfs/data/kanban:/var/www/app/data
+      - /var/lib/srv/$USER/docker/kanboard/kanboard/latest/rootfs/data/kanban/plugins:/var/www/app/plugins
+    depends_on:
+      db:
+        condition: 'service_healthy'
+    networks:
+      - kanban
+  db:
+    image: mariadb:latest
+    container_name: kanban-db
+    hostname: kanban-db
+    restart: always
+    pull_policy: always
+    command: --default-authentication-plugin=mysql_native_password
+    logging: *default-logging
+    environment:
+      - TZ=${TZ:-America/New_York}
+      - MYSQL_USER=kanboard
+      - MYSQL_DATABASE=kanboard
+      - MYSQL_PASSWORD=nY05cTKHNAUTRzA7uCjMYBP64MeXOwgq
+      - MYSQL_ROOT_PASSWORD=nY05cTKHNAUTRzA7uCjMYBP64MeXOwgq
+    volumes:
+      - /var/lib/srv/$USER/docker/db/mariadb/kanboard:/var/lib/mysql
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'healthcheck.sh',
+          '--su-mysql',
+          '--connect',
+          '--innodb_initialized',
+        ]
+      start_period: 1m
+      start_interval: 10s
+      interval: 1m
+      timeout: 5s
+      retries: 3
+    networks:
+      - kanban
+
+networks:
+  kanban:
+    name: kanban
+    external: false
