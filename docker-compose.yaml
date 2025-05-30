@@ -21,8 +21,8 @@ services:
     ports:
       - '1270.0.1:59009:80'
     volumes:
-      - /var/lib/srv/$USER/docker/kanboard/kanboard/latest/rootfs/data/kanban:/var/www/app/data
-      - /var/lib/srv/$USER/docker/kanboard/kanboard/latest/rootfs/data/kanban/plugins:/var/www/app/plugins
+      - /var/lib/srv/$USER/docker/kanboard/rootfs/data/kanban:/var/www/app/data
+      - /var/lib/srv/$USER/docker/kanboard/rootfs/data/kanban/plugins:/var/www/app/plugins
     depends_on:
       db:
         condition: 'service_healthy'
@@ -43,7 +43,7 @@ services:
       - MYSQL_PASSWORD=nY05cTKHNAUTRzA7uCjMYBP64MeXOwgq
       - MYSQL_ROOT_PASSWORD=nY05cTKHNAUTRzA7uCjMYBP64MeXOwgq
     volumes:
-      - /var/lib/srv/$USER/docker/db/mariadb/kanboard:/var/lib/mysql
+      - /var/lib/srv/$USER/databases/mariadb/kanboard:/var/lib/mysql
     healthcheck:
       test:
         [
