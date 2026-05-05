@@ -21,8 +21,8 @@ services:
     ports:
       - '172.17.0.1:59009:80'
     volumes:
-      - './rootfs/data/kanban:/var/www/app/data'
-      - './rootfs/data/kanban/plugins:/var/www/app/plugins'
+      - './volumes/data/kanban:/var/www/app/data'
+      - './volumes/data/kanban/plugins:/var/www/app/plugins'
     depends_on:
       db:
         condition: 'service_healthy'
@@ -43,7 +43,7 @@ services:
       MYSQL_PASSWORD: ${DB_USER_PASS:-changeme_db_password}
       MYSQL_ROOT_PASSWORD: ${DB_ADMIN_PASS:-changeme_admin_password}
     volumes:
-      - './rootfs/data/db/mariadb/kanban:/var/lib/mysql'
+      - './volumes/data/db/mariadb/kanban:/var/lib/mysql'
     healthcheck:
       test:
         [
