@@ -51,9 +51,9 @@ See `docker-compose.yaml` for complete list of configurable options.
 
 ## 📂 Volumes
 
-- `./rootfs/data/kanban` - Data storage
-- `./rootfs/data/kanban/plugins` - Data storage
-- `./rootfs/data/db/mariadb/kanban` - Data storage
+- `./volumes/data/kanban` - Data storage
+- `./volumes/data/kanban/plugins` - Data storage
+- `./volumes/data/db/mariadb/kanban` - Data storage
 
 ## 🔐 Security
 
