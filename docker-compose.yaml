@@ -18,6 +18,8 @@ services:
     environment:
       TZ: ${TZ:-America/New_York}
       DATABASE_URL: mysql://${DB_USER_NAME:-kanboard}:${DB_USER_PASS:-changeme_db_password}@kanban-db/${DB_CREATE_DATABASE_NAME:-kanboard}
+      CONTAINER_NAME: kanban-app
+      HOSTNAME: ${BASE_HOST_NAME:-$HOSTNAME}
     ports:
       - '172.17.0.1:59009:80'
     volumes:
@@ -28,6 +30,25 @@ services:
         condition: 'service_healthy'
     networks:
       - kanban
+      - proxy
+      - cloudflare
+    labels:
+      - 'traefik.enable=true'
+      - 'cloudflare.enable=true'
+      - 'traefik.docker.network=proxy'
+      - 'cloudflare.service=http://kanban-app:80'
+      - 'cloudflare.hostname=kanban.${CLOUDFLARE_ZONE_NAME:-}'
+      - 'traefik.http.routers.kanban-app.entrypoints=http'
+      - 'traefik.http.routers.kanban-app-secure.tls=true'
+      - 'traefik.http.routers.kanban-app.rule=Host($(${BASE_HOST_NAME:-$HOSTNAME}))'
+      - 'traefik.http.middlewares.kanban-app-https-redirect.redirectscheme.scheme=https'
+      - 'traefik.http.routers.kanban-app.middlewares=kanban-app-https-redirect'
+      - 'traefik.http.routers.kanban-app-secure.entrypoints=https'
+      - 'traefik.http.routers.kanban-app-secure.rule=Host($(${BASE_HOST_NAME:-$HOSTNAME}))'
+      - 'traefik.http.routers.kanban-app-secure.tls.certresolver=cloudflare'
+      - 'traefik.http.routers.kanban-app-secure.service=kanban-app'
+      - 'traefik.http.services.kanban-app.loadbalancer.server.port=80'
+
   db:
     image: mariadb:latest
     container_name: kanban-db
@@ -42,6 +63,7 @@ services:
       MYSQL_DATABASE: ${DB_CREATE_DATABASE_NAME:-kanboard}
       MYSQL_PASSWORD: ${DB_USER_PASS:-changeme_db_password}
       MYSQL_ROOT_PASSWORD: ${DB_ADMIN_PASS:-changeme_admin_password}
+      CONTAINER_NAME: kanban-db
     volumes:
       - './volumes/data/db/mariadb/kanban:/var/lib/mysql'
     healthcheck:
@@ -65,3 +87,7 @@ networks:
   kanban:
     name: kanban
     external: false
+  proxy:
+    external: true
+  cloudflare:
+    external: true
